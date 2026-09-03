@@ -105,7 +105,6 @@ case mid(saledate,5,3)
     else 'None'
 end as sale_month
 from car_prices;
-
 select *
 from car_prices_valid;
 
@@ -116,19 +115,42 @@ group by sale_year, sale_month
 order by sale_year, sale_month;
 
 -- Q5 num sales each month
+
 select sale_month, count(*) as num_of_sales_per_month
 from car_prices_valid
 group by sale_month
 order by sale_month;
 
 -- Q6 top 5 models for each body type
-select body, num_model 
-from (
+
+-- using the limit function as a filter
 select
 body , count(*) as num_model,
-rank() over(partition by body order by count(*) desc) as ranking
+rank() over(order by count(*) desc) as ranking
 from car_prices
-group by body) s
-where num_model <= 5
+group by body
+limit 5;
+
+-- using the subquery method to determine top 5
+select * from (
+select
+body , count(*) as num_model,
+rank() over(order by count(*) desc) as ranking
+from car_prices
+group by body
+) as ranked_table
+where ranking <= 5;
+
+
+-- using the CTE
+with ranked_table as(
+select
+body , count(*) as num_model,
+rank() over(order by count(*) desc) as ranking
+from car_prices
+group by body
+)
+select * from ranked_table 
+where ranking <= 5;
 ;
 
